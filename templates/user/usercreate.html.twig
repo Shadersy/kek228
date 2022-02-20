@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Создание пользователя{% endblock %}
+{% block header %} {% include 'security/header.html.twig' %} {% endblock header %}
+ {% block stylesheets %}
+
+     <link href="{{ asset('build/styles.css') }}" rel="stylesheet"/>
+
+ {% endblock %}
+
+{% block javascripts %}
+
+        <script src="{{asset('build/runtime.js') }}" ></script>
+        <script src="{{asset('build/app.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('build/app.js')}}"  ></script>
+
+{% endblock %}
+
+{% block body %}
+
+    <div class="d-flex justify-content-center">
+
+    {{ include('user/_formusercreate.html.twig') }}
+    </form>
+    </div>
+
+    </body>
+
+
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <center>Неоходимо перейти в систему <a style="text-decoration: none" href="https://redmine.skillum.ru/">Redmine</a> для восстановления пароля</center>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="exit" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+//         $('#usercreate').click(function (e) {
+//             $('#exampleModal').modal('show');
+//         })
+//         $('button.btn-secondary').click(function (e) {
+//             $('#exampleModal').modal('hide');
+//         })
+//         $('button.close').click(function (e) {
+//             $(".alert").alert('close')
+//         })
+</script>
+{% endblock %}

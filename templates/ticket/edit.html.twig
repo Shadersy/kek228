@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Редактирование курса{% endblock %}
+
+
+ {% block stylesheets %}
+
+     <link href="{{ asset('build/styles.css') }}" rel="stylesheet"/>
+
+ {% endblock %}
+
+ {% block javascript %}
+
+ <script src="{{ asset('build/runtime.js') }}" />
+ 	<script src="{{ asset('build/styles.js') }}" />
+ {% endblock %}
+
+{% block body %}
+
+    {% for message in app.flashes('wrong') %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>   {{message}} </strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+
+    <h1><b>Редактирование курса</b></h1>
+
+    {{ include('course/_form.html.twig', {'button_label': 'Обновить'}) }}
+
+    <div class="d-flex flex-row">
+        <div class="p-2"><a class="btn btn-outline-primary" href="{{ path('course_index') }}">К списку курсов</a></div>
+        <div class="p-2">{{ include('course/_delete_form.html.twig') }}</div>
+    </div>
+    {% endblock %}

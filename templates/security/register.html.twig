@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Авторизация{% endblock %}
+{% block header %} {% include 'security/header.html.twig' %} {% endblock header %}
+ {% block stylesheets %}
+
+     <link href="{{ asset('build/styles.css') }}" rel="stylesheet"/>
+
+ {% endblock %}
+
+{% block javascripts %}
+
+        <script src="{{asset('build/runtime.js') }}" ></script>
+        <script src="{{asset('build/app.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('build/app.js')}}"  ></script>
+
+{% endblock %}
+
+{% block body %}
+
+{#    {% if error is defined %}#}
+{#        <p style="color:red">{{ error }}</p>#}
+{#    {% endif %}#}
+
+    <body class=" h-100 text-center text-black">
+
+    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+        <div class="py-5">
+            <h1 class="display-5 fw-bold text-black">Вход в систему</h1>
+            <div class="col-lg-6 mx-auto">
+                {{ form_start(authorizationForm) }}
+                    {% form_theme authorizationForm 'bootstrap_4_layout.html.twig' %}
+                        {{ form_row(authorizationForm.login, {
+                            label: 'Логин',
+                        }) }}
+                        {{ form_row(authorizationForm.password, {
+                            label: 'Пароль',
+                            autocomplete: 'off',
+                            type: 'password',
+                        }) }}
+                <div class="checkbox mb-3">
+                    <label>
+                        <input type="checkbox" name="_remember_me"> Запомнить меня
+                    </label>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <div class="p-2"><button type="submit" class="btn">Войти</button></div>
+                </div>
+                {{ form_end(authorizationForm) }}
+            </div>
+         </div>
+        </div>
+    </body>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <center>Неоходимо перейти в систему <a style="text-decoration: none" href="https://redmine.skillum.ru/">Redmine</a> для восстановления пароля</center>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="exit" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+        $('#forgotPassword').click(function (e) {
+            $('#exampleModal').modal('show');
+        })
+        $('button.btn-secondary').click(function (e) {
+            $('#exampleModal').modal('hide');
+        })
+        $('button.close').click(function (e) {
+            $(".alert").alert('close')
+        })
+</script>
+{% endblock %}

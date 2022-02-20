@@ -1,0 +1,13 @@
+
+
+{{ form_start(form) }}
+       {% if error is defined %}
+         <p style="color:red">{{ error }}</p>
+       {% endif %}
+
+  {% form_theme form 'bootstrap_4_layout.html.twig' %}
+<p>{{ form_widget(form) }}</p>
+<button id="usercreate" class="btn btn-outline-primary">{{ button_label|default('Создать') }}</button>
+{{ form_end(form) }}
+
+

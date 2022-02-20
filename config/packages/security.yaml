@@ -1,0 +1,21 @@
+# config/packages/security.yaml
+security:
+  # ...
+
+  providers:
+    app_user_provider:
+      entity:
+        class: App\Entity\User
+        property: login
+
+  firewalls:
+    dev:
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+    main:
+      anonymous: true
+      form_login:
+        login_path: app_login
+        login_check: index_ticket
+      logout:
+        path: app_logout
