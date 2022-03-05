@@ -84,7 +84,7 @@
 {#                                                    </a>#}
 {#                                                </li>#}
                     </ul>
-
+                    {% if is_granted('ROLE_ADMIN') %}
                     <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                                                 <span>Панель администратора</span>
                                                 <a class="d-flex align-items-center text-muted" href="#">
@@ -94,13 +94,14 @@
                                             <ul class="nav flex-column mb-2">
                                                 <li class="nav-item">
                                                 <li class="nav-item">
-                                                    <a class="nav-link" href="{{path('user_new')}}">
+                                                    <a class="nav-link" href="{{path('registration')}}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                                                             Создание пользователя
                                                     </a>
                                                 </li>
                                             </ul>
                                         </div>
+                {% endif %}
             </nav>
 
             <main role="main" class="col-md-9"><div style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;" class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
@@ -126,6 +127,7 @@
                             <th scope="col">Статус</th>
                             <th scope="col">Приоритет</th>
                             <th scope="col">Автор</th>
+                            <th scope="col1">Дата создания</th>
                             <th scope="col">Срок</th>
                         </tr>
                         </thead>
@@ -145,6 +147,7 @@
                                         <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#ff0000"></rect></svg>
                                     {% endif %}</td>
                                 <td>{{ ticket.sender }}</td>
+                                <td>{{ ticket.createdOn | date('d.m.Y') }}</td>
                                 <td>{% if ticket.deadline is not null%}
                                         {{ticket.deadline | date('d.m.Y') }}
                                     {% else %}

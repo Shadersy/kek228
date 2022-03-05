@@ -14,11 +14,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\Table(name="`user`")
  */
-class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable
+class User implements UserInterface
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
+     * @ORM\GeneratedValue(strategy="SEQUENCE")
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -78,6 +78,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
         return $this;
     }
 
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+        return $this;
+    }
+
     /**
      * A visual identifier that represents this user.
      *
@@ -111,21 +117,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
-     * @return string the hashed password for this user
-     */
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
 
         return $this;
     }
@@ -248,5 +239,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
             $this->id,
             $this->login,
             $this->password) = unserialize($serialized);
+    }
+
+    public function getPassword()
+    {
+        return (string) $this->password;
     }
 }

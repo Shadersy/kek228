@@ -43,57 +43,27 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     *
-     * @Route("/login", name="app_login", methods={"GET", "POST"})
+     * @Route("/logout", name="app_logout")
      */
-    public function loginAction(Request $request, UserRepository $userRepository, AuthorizationCheckerInterface $authChecker): Response
+    public function logout(): void
     {
-
-//        if ($authChecker->isGranted('ROLE_USER')) {
-//            return $this->redirectToRoute('ticket_index');
-//        }
-//
-//        $user = new User();
-//
-//        $form = $this->createForm(AuthorizationFormType::class, $user);
-//
-//        $form->handleRequest($request);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
-//
-//
-//            $authenticatedUser = $userRepository->findOneBy(['login' => $user->getLogin(), 'password' => $user->getPassword()]);
-//
-//            if (!$authenticatedUser) {
-//                return $this->render('security/register.html.twig', [
-//                    'authorizationForm' => $form->createView(),
-//                    'error' => 'Данные не верные'
-//                ]);
-//            }
-
-//            $token = new UsernamePasswordToken($authenticatedUser->getLogin(), null, 'main', $user->getRoles());
-//
-//            $this->tokenStorage->setToken($token);
-//
-//            $this->session->set('_security_main', serialize($token));
-//            $this->session->save();
-
-
-//            dump($this->getUser());die;
-            return $this->redirectToRoute('ticket_index');
-//        }
-
-//        return $this->render('security/register.html.twig', [
-////            'authorizationForm' => $form->createView(),
-//        ]);
+        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
     /**
-     * @Route("/logout", name="app_logout", methods={"GET"})
+     * @Route("/login", name="app_login")
      */
-    public function logout()
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        // if ($this->getUser()) {
+        //     return $this->redirectToRoute('target_path');
+        // }
+
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
 }

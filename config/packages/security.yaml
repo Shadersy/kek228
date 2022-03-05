@@ -1,21 +1,42 @@
 # config/packages/security.yaml
 security:
   # ...
+  encoders:
+    App\Entity\User: sha512
 
   providers:
     app_user_provider:
       entity:
         class: App\Entity\User
         property: login
+    # used to reload user from session & other features (e.g. switch_user)
 
   firewalls:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
+#    stas:
+#      anonymous: true
+#      pattern: ^/login
+#      form_login:
+#        login_path: app_login
+#        check_path: app_login
+#        username_parameter: 'authorization_form[login]'
+#        password_parameter: 'authorization_form[password]'
+#      logout:
+#        path: app_logout
+#      guard:
+#        authenticators:
+#          - App\Security\LoginFormAuthenticator
     main:
-      anonymous: true
-      form_login:
-        login_path: app_login
-        login_check: index_ticket
+      anonymous: lazy
+      provider: app_user_provider
+      guard:
+        authenticators:
+          - App\Security\LoginFormAuthenticator
       logout:
         path: app_logout
+        target: /login
+
+  access_control:
+    - { path: ^/(login|login_check|logout)/, roles: IS_AUTHENTICATED_ANONYMOUSLY }

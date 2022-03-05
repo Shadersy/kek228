@@ -37,6 +37,11 @@ class Comment
      */
     private $createdOn;
 
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $fileName;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -50,6 +55,18 @@ class Comment
     public function setMessage(?string $message): self
     {
         $this->message = $message;
+
+        return $this;
+    }
+
+    public function getFileName(): ?string
+    {
+        return $this->fileName;
+    }
+
+    public function setFileName(?string $filename): self
+    {
+        $this->fileName = $filename;
 
         return $this;
     }

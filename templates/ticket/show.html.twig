@@ -80,7 +80,7 @@
 
     <nav class="bg-dark d-flex flex-row-reverse p-0">
         <li class="nav-item text-nowrap">
-            <a class="nav-link text-white bg-dark" href="#">Выйти</a>
+            <a class="nav-link text-white bg-dark" href="{{ path('app_logout') }}">Выйти</a>
         </li>
         <li class="nav-item text-nowrap">
             <a class="nav-link text-white bg-dark" href="#">Пользователь: {{ user }}</a>
@@ -203,7 +203,10 @@
                             </div>
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item">Статус: {{ ticket.status }}</li>
-                                <li class="list-group-item">{{  include('ticket/_statusupdate.html.twig') }}</li>
+
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <li class="list-group-item">{{  include('ticket/_statusupdate.html.twig') }}</li>
+                                {% endif %}
                                 <li class="list-group-item">Приоритет:  {% if ticket.importance == 1%} Низкий {% elseif ticket.importance == 2 %} Средний{% else %}Высокий{% endif %}
                                 </li>
                                 <li class="list-group-item">Автор: {{ ticket.sender }}</li>

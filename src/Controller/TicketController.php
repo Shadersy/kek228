@@ -19,6 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Forms;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -27,6 +28,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 
 /**
@@ -46,7 +48,7 @@ class TicketController extends AbstractController
      * @Route("/", name="ticket_index", methods={"GET"})
      */
     public function index(TicketRepository $ticketRepository, EventDispatcherInterface $eventDispatcher,
-                          Security $security): Response
+                          Security $security, UserRepository $userRepository): Response
     {
 
 //        if ($this->tokenStorage->getToken()->getUser() == 'anon.') {
@@ -65,12 +67,6 @@ class TicketController extends AbstractController
 
         $em = $this->getDoctrine()->getManager();
         $user = $this->getUser();
-//        dump($this->tokenStorage);
-        dump($this->getUser());
-        dump($this->tokenStorage->getToken());die;
-//        dump($this->container->get('security.token_storage'));
-//        dump($this->getUser());die;
-        $user = $em->find(\App\Entity\User::class, $user->getId());
 
         return $this->render('ticket/index.html.twig', [
             'tickets' => $tickets,
@@ -81,7 +77,7 @@ class TicketController extends AbstractController
     /**
      * @Route("/new", name="ticket_new", methods={"GET","POST"})
      */
-    public function new(Request $request, AuthorizationCheckerInterface $authChecker): Response
+    public function new(Request $request, AuthorizationCheckerInterface $authChecker, UserRepository $userRepository): Response
     {
 //        if (false === $authChecker->isGranted('ROLE_SUPER_ADMIN')) {
 //            return $this->redirectToRoute('course_index');
@@ -93,8 +89,9 @@ class TicketController extends AbstractController
         $form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
+
         $user = $this->getUser();
-        $user = $em->find(\App\Entity\User::class, $user->getId());
+        $user = $userRepository->find($user->getId());
 
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -125,14 +122,13 @@ class TicketController extends AbstractController
     /**
      * @Route("/{id}", name="ticket_show", methods={"GET", "POST"})
      */
-    public function show(Ticket $ticket, Request $request, UserRepository $userRepository): Response
+    public function show(Ticket $ticket, Request $request, UserRepository $userRepository,  SluggerInterface $slugger): Response
     {
 
         $em = $this->getDoctrine()->getManager();
         $em->find(Ticket::class, $ticket->getId());
-        $user = $this->getUser();
 
-        $user = $em->find(\App\Entity\User::class, $user->getId());
+        $user = $this->getUser();
 
         $statuses = [
             'В обработке' => 'В обработке',
@@ -180,8 +176,9 @@ class TicketController extends AbstractController
 
         $filledComment = new Comment();
         $form = $this->createForm(CommentType::class, $filledComment);
-
+        $file = $form->get('file')->getData();
         $form->handleRequest($request);
+
 
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -190,6 +187,28 @@ class TicketController extends AbstractController
             $comment->setCreatedOn(new \DateTime());
             $comment->setTicket($ticket);
             $comment->setMessage($filledComment->getMessage());
+
+            if ($file) {
+                $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                // this is needed to safely include the file name as part of the URL
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'. $file->guessExtension();
+
+                // Move the file to the directory where brochures are stored
+                try {
+                    $file->move(
+                        $this->getParameter('file_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // ... handle exception if something happens during file upload
+                }
+
+                // updates the 'brochureFilename' property to store the PDF file name
+                // instead of its contents
+                $comment->setFileName($newFilename);
+            }
+
             $em->persist($comment);
             $em->flush();
 
