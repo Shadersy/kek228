@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CommentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -38,9 +40,14 @@ class Comment
     private $createdOn;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\OneToMany(targetEntity=File::class, mappedBy="Comment", fetch="EAGER")
      */
-    private $fileName;
+    private $file;
+
+    public function __construct()
+    {
+        $this->file = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -55,18 +62,6 @@ class Comment
     public function setMessage(?string $message): self
     {
         $this->message = $message;
-
-        return $this;
-    }
-
-    public function getFileName(): ?string
-    {
-        return $this->fileName;
-    }
-
-    public function setFileName(?string $filename): self
-    {
-        $this->fileName = $filename;
 
         return $this;
     }
@@ -103,6 +98,36 @@ class Comment
     public function setCreatedOn(\DateTimeInterface $createdOn): self
     {
         $this->createdOn = $createdOn;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|File[]
+     */
+    public function getFile(): Collection
+    {
+        return $this->file;
+    }
+
+    public function addFile(File $file): self
+    {
+        if (!$this->file->contains($file)) {
+            $this->file[] = $file;
+            $file->setComment($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(File $file): self
+    {
+        if ($this->file->removeElement($file)) {
+            // set the owning side to null (unless already changed)
+            if ($file->getComment() === $this) {
+                $file->setComment(null);
+            }
+        }
 
         return $this;
     }

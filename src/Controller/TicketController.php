@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Comment;
+use App\Entity\File;
 use App\Entity\Ticket;
 use App\Event\TestEvent;
 use App\Event\TestEventSubscriber;
@@ -19,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Forms;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -63,7 +65,14 @@ class TicketController extends AbstractController
 
 //        $token = $this->tokenStorage->getToken()->getUser()->getApiToken();
 
-        $tickets = $ticketRepository->findAll();
+        if (in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+
+            $tickets = $ticketRepository->findAll();
+
+        } else {
+
+            $tickets = $ticketRepository->findBy(['sender' => $this->getUser()->getId()]);
+        }
 
         $em = $this->getDoctrine()->getManager();
         $user = $this->getUser();
@@ -176,7 +185,6 @@ class TicketController extends AbstractController
 
         $filledComment = new Comment();
         $form = $this->createForm(CommentType::class, $filledComment);
-        $file = $form->get('file')->getData();
         $form->handleRequest($request);
 
 
@@ -187,26 +195,31 @@ class TicketController extends AbstractController
             $comment->setCreatedOn(new \DateTime());
             $comment->setTicket($ticket);
             $comment->setMessage($filledComment->getMessage());
+            $file = $form->get('file')->getNormData();
 
             if ($file) {
+
                 $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 // this is needed to safely include the file name as part of the URL
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = $safeFilename.'-'.uniqid().'.'. $file->guessExtension();
+                $extension = $file->guessExtension();
 
-                // Move the file to the directory where brochures are stored
                 try {
                     $file->move(
-                        $this->getParameter('file_directory'),
+                        $this->getParameter('upload_directory'),
                         $newFilename
                     );
+
+                    $fileObject = new File();
+                    $fileObject->setFileName($newFilename);
+                    $fileObject->setExtension($extension);
+                    $em->persist($fileObject);
+                    $comment->addFile($fileObject);
                 } catch (FileException $e) {
                     // ... handle exception if something happens during file upload
                 }
 
-                // updates the 'brochureFilename' property to store the PDF file name
-                // instead of its contents
-                $comment->setFileName($newFilename);
             }
 
             $em->persist($comment);
@@ -220,6 +233,7 @@ class TicketController extends AbstractController
             'ticket' => $ticket,
             'form' => $form->createView(),
             'formStatus' => $formStatus->createView(),
+            'upload_directory' => $this->getParameter('upload_directory'),
         ]);
     }
 }

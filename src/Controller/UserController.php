@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Ticket;
-use App\Entity\UserDeprecated;
 use App\Form\TicketType;
 use App\Form\UserCreateType;
 use App\Repository\UserRepository;

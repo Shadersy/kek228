@@ -45,6 +45,9 @@ class CommentType extends AbstractType
                         'maxSize' => '1024k',
                         'mimeTypes' => [
                             'application/pdf',
+                            'web_images',
+                            'image/jpeg',
+                            'image/png',
                             'application/x-pdf',
                         ],
                         'mimeTypesMessage' => 'Please upload a valid PDF document',
