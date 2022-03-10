@@ -9,6 +9,7 @@ use App\Event\TestEvent;
 use App\Event\TestEventSubscriber;
 use App\Form\CommentType;
 use App\Form\TicketType;
+use App\Repository\TelegramApiRepository;
 use App\Repository\TicketRepository;
 use App\Repository\UserRepository;
 use App\Security\User;
@@ -49,10 +50,14 @@ class TicketController extends AbstractController
     /**
      * @Route("/", name="ticket_index", methods={"GET"})
      */
-    public function index(TicketRepository $ticketRepository, EventDispatcherInterface $eventDispatcher,
-                          Security $security, UserRepository $userRepository): Response
+    public function index(
+        TicketRepository $ticketRepository,
+        EventDispatcherInterface $eventDispatcher,
+        Security $security,
+        UserRepository $userRepository,
+        Request $request
+    ): Response
     {
-
 //        if ($this->tokenStorage->getToken()->getUser() == 'anon.') {
 //            return $this->render('course/index.html.twig', [
 //                'courses' => $ticketRepository->findAll()
@@ -86,7 +91,8 @@ class TicketController extends AbstractController
     /**
      * @Route("/new", name="ticket_new", methods={"GET","POST"})
      */
-    public function new(Request $request, AuthorizationCheckerInterface $authChecker, UserRepository $userRepository): Response
+    public function new(Request $request, AuthorizationCheckerInterface $authChecker, TelegramApiRepository $telegramApiRepository,
+                        UserRepository $userRepository, EventDispatcherInterface $dispatcher): Response
     {
 //        if (false === $authChecker->isGranted('ROLE_SUPER_ADMIN')) {
 //            return $this->redirectToRoute('course_index');
@@ -118,6 +124,21 @@ class TicketController extends AbstractController
             $em->persist($ticket);
             $em->flush();
 
+            $existedTelegramConfig = $telegramApiRepository->findAll();
+            if($existedTelegramConfig) {
+                $telegramConfig = $existedTelegramConfig[0];
+                $event = new TestEvent(
+                    $telegramConfig->getBotToken(),
+                    $telegramConfig->getChatId(),
+                    '
+                    В системе создана заявка №' . $ticket->getId() . ' ' . PHP_EOL .
+                    'Важность: ' . $ticket->getImportance() . ' ' . PHP_EOL .
+                    'Автор: ' . $ticket->getSender() . ' ' . PHP_EOL .
+                    'Дата формирования: ' . $ticket->getCreatedOn()->format('Y:m:d')
+                );
+                $dispatcher->addSubscriber(new TestEventSubscriber());
+                $dispatcher->dispatch($event, TestEvent::NAME);
+            }
             return $this->redirectToRoute('ticket_index');
 
         }
