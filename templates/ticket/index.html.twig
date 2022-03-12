@@ -112,24 +112,28 @@
 
                     <div class="btn-toolbar mb-2 mb-md-0">
 
-                        <form>
+
+                        <form method="POST" action="?filter=">
     <div class="form-row">
         <div class="col-md-6">
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="byNumberFilterLabel" style="display: none">Номер</span>
                             </div>
-                            <input type="text" class="form-control" id="byNumberFilter" style="display: none" aria-describedby="basic-addon1">
+                            <input type="number" class="form-control" name="filter[number]" id="byNumberFilter" style="display: none" aria-describedby="basic-addon1">
                         </div>
         </div>
+
         <div class="col-md-6">
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="byStatusFilterLabel" style="display: none">Статус</span>
-                            </div>
-                            <input type="text" class="form-control" id="byStatusFilter" style="display: none" aria-describedby="basic-addon1">
-                        </div>
+            <label class="required"  style="display: none" id="byStatusFilterLabel" for="byStatusFilter">Статус</label>
+                <select style="display: none" id="byStatusFilter" name="filter[status]" class="form-control">
+                    <option value="1">В обработке</option>
+                    <option value="2">Отклонено</option>
+                    <option value="3">Закрыт</option>
+                </select>
         </div>
+
+
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="byPriorityFilterLabel" style="display: none">Приоритет</span>
@@ -141,7 +145,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="byAuthorFilterLabel" style="display: none">Автор</span>
                             </div>
-                            <input type="text" class="form-control" id="byAuthorFilter" aria-describedby="basic-addon1" style="display: none">
+                            <input type="text" name="filter[author]" class="form-control" id="byAuthorFilter" aria-describedby="basic-addon1" style="display: none">
                         </div>
 
                         <div class="input-group mb-3">
@@ -172,7 +176,7 @@
                             <input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1" style="display: none">
                         </div>
     </div>
-                            <button type="submit" style="display: none">Применить</button>
+                            <button type="submit" id="submitFilter" style="display: none">Применить</button>
                     </form>
 
                     </div>
@@ -235,34 +239,54 @@
             <div class="modal-content">
 
                 <div class="modal-body">
-
+<form method="GET">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" onclick="
-                        if(this.checked)
+                        <input class="form-check-input" id="byNumberCheck" type="checkbox" value=""  onclick="
+
+                         if(this.checked)
                             {
+                                localStorage.setItem('byNumberFilterChecked', true);
                                 document.getElementById('byNumberFilterLabel').style.display='';
                                 document.getElementById('byNumberFilter').style.display=''
+                                document.getElementById('submitFilter').style.display='';
                             }
                         else {
+                            localStorage.removeItem('byNumberFilterChecked');
                             document.getElementById('byNumberFilterLabel').style.display='none';
                             document.getElementById('byNumberFilter').style.display='none';
-                            document.getElementById('byNumberFilter').value=''
-                        ;}">
+                            document.getElementById('byNumberFilter').value='';
+
+                             if(!localStorage.getItem('byNumberFilterChecked') && !localStorage.getItem('byStatusFilterChecked')
+                            && !localStorage.getItem('byAuthorFilterChecked')) {
+                                document.getElementById('submitFilter').style.display='none'
+                            }
+                        }
+
+                       ">
                         <label class="form-check-label" for="flexCheckDefault">
                             Номер задачи
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" onclick=" if(this.checked)
+                        <input class="form-check-input" type="checkbox" value="" id="byStatusCheck" onclick="
+                         if(this.checked)
                             {
+                                localStorage.setItem('byStatusFilterChecked', true);
                                 document.getElementById('byStatusFilterLabel').style.display='';
                                 document.getElementById('byStatusFilter').style.display=''
                             }
                         else {
+                            localStorage.removeItem('byStatusFilterChecked');
                             document.getElementById('byStatusFilterLabel').style.display='none';
                             document.getElementById('byStatusFilter').style.display='none';
-                            document.getElementById('byStatusFilter').value=''
-                        ;}">
+                            document.getElementById('byStatusFilter').value='';
+
+                            if(!localStorage.getItem('byNumberFilterChecked') && !localStorage.getItem('byStatusFilterChecked')
+                            && !localStorage.getItem('byAuthorFilterChecked')) {
+                                document.getElementById('submitFilter').style.display='none'
+                            }
+
+                        }">
                         <label class="form-check-label" for="flexCheckChecked">
                             Статус
                         </label>
@@ -274,7 +298,25 @@
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+                        <input class="form-check-input" type="checkbox" value="" id="byAuthorCheck" onclick="
+                        if(this.checked)
+                            {
+                                localStorage.setItem('byAuthorFilterChecked', true);
+                                document.getElementById('byAuthorFilterLabel').style.display='';
+                                document.getElementById('byAuthorFilter').style.display=''
+                            }
+                        else {
+                            localStorage.removeItem('byAuthorFilterChecked');
+                            document.getElementById('byAuthorFilterLabel').style.display='none';
+                            document.getElementById('byAuthorFilter').style.display='none';
+                            document.getElementById('byAuthorFilter').value='';
+
+                            if(!localStorage.getItem('byNumberFilterChecked') && !localStorage.getItem('byStatusFilterChecked')
+                            && !localStorage.getItem('byAuthorFilterChecked')) {
+                                  document.getElementById('submitFilter').style.display='none'
+                            }
+                        }
+">
                         <label class="form-check-label" for="flexCheckChecked">
                             Автор
                         </label>
@@ -302,6 +344,47 @@
 
 
     <script>
+
+        if(localStorage.getItem('byNumberFilterChecked')) {
+            document.getElementById('byNumberFilterLabel').style.display='';
+            document.getElementById('byNumberFilter').style.display='';
+            document.getElementById('submitFilter').style.display='';
+            $('#byNumberCheck').prop('checked', true);
+        } else {
+            document.getElementById('byNumberFilterLabel').style.display='none';
+            document.getElementById('byNumberFilter').style.display='none';
+            document.getElementById('byNumberFilter').value='';
+            $('#byNumberCheck').prop('checked', false);
+        }
+
+        if(localStorage.getItem('byStatusFilterChecked')) {
+            document.getElementById('byStatusFilterLabel').style.display='';
+            document.getElementById('byStatusFilter').style.display='';
+            document.getElementById('submitFilter').style.display='';
+            $('#byStatusCheck').prop('checked', true);
+
+        } else {
+            document.getElementById('byStatusFilterLabel').style.display='none';
+            document.getElementById('byStatusFilter').style.display='none';
+            document.getElementById('byStatusFilter').value='';
+            $('#byStatusCheck').prop('checked', false);
+        }
+
+        if(localStorage.getItem('byAuthorFilterChecked')) {
+            document.getElementById('byAuthorFilterLabel').style.display='';
+            document.getElementById('byAuthorFilter').style.display='';
+            document.getElementById('submitFilter').style.display='';
+            $('#byAuthorCheck').prop('checked', true);
+
+        } else {
+            document.getElementById('byAuthorFilterLabel').style.display='none';
+            document.getElementById('byAuthorFilter').style.display='none';
+            document.getElementById('byAuthorFilter').value='';
+            $('#byAuthorCheck').prop('checked', false);
+        }
+
+
+
         $('#filter').click(function (e) {
             $('#exampleModal').modal('show');
         })

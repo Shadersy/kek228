@@ -41,6 +41,11 @@ class TicketController extends AbstractController
 {
     private $tokenStorage;
 
+    public static $STATUS_CLOSED = '3';
+    public static $STATUS_CANCELED = '2';
+    public static $STATUS_IN_JOB = '1';
+//    public static $STATUS_
+
     public function __construct(TokenStorageInterface $tokenStorage)
     {
         $this->tokenStorage = $tokenStorage;
@@ -48,7 +53,7 @@ class TicketController extends AbstractController
 
 
     /**
-     * @Route("/", name="ticket_index", methods={"GET"})
+     * @Route("/", name="ticket_index", methods={"GET", "POST"})
      */
     public function index(
         TicketRepository $ticketRepository,
@@ -58,26 +63,52 @@ class TicketController extends AbstractController
         Request $request
     ): Response
     {
-//        if ($this->tokenStorage->getToken()->getUser() == 'anon.') {
-//            return $this->render('course/index.html.twig', [
-//                'courses' => $ticketRepository->findAll()
-//            ]);
-//        }
-//
-//        $event = new TestEvent();
-//        $eventDispatcher->addSubscriber(new TestEventSubscriber());
-//        $eventDispatcher->dispatch($event, TestEvent::NAME);
+        $builder = $ticketRepository->createQueryBuilder('p');
 
-//        $token = $this->tokenStorage->getToken()->getUser()->getApiToken();
-
+        $builder = $ticketRepository->createQueryBuilder('p');
         if (in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
 
-            $tickets = $ticketRepository->findAll();
+
 
         } else {
-
-            $tickets = $ticketRepository->findBy(['sender' => $this->getUser()->getId()]);
+            $builder->andWhere('p.sender = ' . $this->getUser()->getId());
         }
+
+        if ($request->request->get('filter') && $request->request->get('filter')['number'] != '') {
+            $filter = $request->request->get('filter');
+
+            $builder->where('p.id =' .  $filter['number']);
+        }
+
+        if ($request->request->get('filter')) {
+            if(isset($request->request->get('filter')['status'])) {
+                $filter = $request->request->get('filter');
+
+                switch ($filter['status']) {
+                    case self::$STATUS_CLOSED :
+                        $builder->andWhere('p.status in (\'Закрыт\')');
+                        break;
+                    case self::$STATUS_CANCELED :
+                        $builder->andWhere('p.status in (\'Отклонено\')');
+                        break;
+                    case self::$STATUS_IN_JOB :
+                        $builder->andWhere('p.status in (\'В обработке\')');
+                        break;
+                }
+            }
+
+            if(isset($request->request->get('filter')['author'])) {
+                $filter = $request->request->get('filter');
+
+                $author = $userRepository->findOneBy(['login' => $filter['author']]);
+                if($author)
+                $builder->andWhere('p.sender = \'' . $author->getId() . '\'' );
+            }
+        }
+
+
+
+        $tickets = $builder->getQuery()->execute();
 
         $em = $this->getDoctrine()->getManager();
         $user = $this->getUser();
