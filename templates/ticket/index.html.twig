@@ -134,13 +134,16 @@
         </div>
 
 
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="byPriorityFilterLabel" style="display: none">Приоритет</span>
-                            </div>
-                            <input type="text" class="form-control" id="byPriorityFilter" aria-describedby="basic-addon1" style="display: none">
+                        <div class="col-md-6">
+                            <label class="required"  style="display: none" id="byPriorityFilterLabel" for="byPriorityFilter">Приоритет</label>
+                            <select style="display: none" id="byPriorityFilter" name="filter[priority]" class="form-control">
+                                <option value="1">Низкий</option>
+                                <option value="2">Средний</option>
+                                <option value="3">Важный</option>
+                            </select>
                         </div>
 
+                        <p>
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="byAuthorFilterLabel" style="display: none">Автор</span>
@@ -257,7 +260,7 @@
                             document.getElementById('byNumberFilter').value='';
 
                              if(!localStorage.getItem('byNumberFilterChecked') && !localStorage.getItem('byStatusFilterChecked')
-                            && !localStorage.getItem('byAuthorFilterChecked')) {
+                            && !localStorage.getItem('byAuthorFilterChecked') && !localStorage.getItem('byPriorityFilterChecked')) {
                                 document.getElementById('submitFilter').style.display='none'
                             }
                         }
@@ -282,7 +285,7 @@
                             document.getElementById('byStatusFilter').value='';
 
                             if(!localStorage.getItem('byNumberFilterChecked') && !localStorage.getItem('byStatusFilterChecked')
-                            && !localStorage.getItem('byAuthorFilterChecked')) {
+                            && !localStorage.getItem('byAuthorFilterChecked') && !localStorage.getItem('byPriorityFilterChecked')) {
                                 document.getElementById('submitFilter').style.display='none'
                             }
 
@@ -292,7 +295,26 @@
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                        <input class="form-check-input" type="checkbox" value="" id="byPriorityCheck" onclick="
+                            if(this.checked)
+                            {
+                                localStorage.setItem('byPriorityFilterChecked', true);
+                                document.getElementById('byPriorityFilterLabel').style.display='';
+                                document.getElementById('byPriorityFilter').style.display=''
+                            }
+                        else {
+                            localStorage.removeItem('byPriorityFilterChecked');
+                            document.getElementById('byPriorityFilterLabel').style.display='none';
+                            document.getElementById('byPriorityFilter').style.display='none';
+                            document.getElementById('byPriorityFilter').value='';
+
+                            if(!localStorage.getItem('byNumberFilterChecked') && !localStorage.getItem('byStatusFilterChecked')
+                            && !localStorage.getItem('byAuthorFilterChecked') && !localStorage.getItem('byPriorityFilterChecked')) {
+                                document.getElementById('submitFilter').style.display='none'
+                            }
+
+                        }
+">
                         <label class="form-check-label" for="flexCheckDefault">
                             Приоритет
                         </label>
@@ -312,8 +334,8 @@
                             document.getElementById('byAuthorFilter').value='';
 
                             if(!localStorage.getItem('byNumberFilterChecked') && !localStorage.getItem('byStatusFilterChecked')
-                            && !localStorage.getItem('byAuthorFilterChecked')) {
-                                  document.getElementById('submitFilter').style.display='none'
+                            && !localStorage.getItem('byAuthorFilterChecked') && !localStorage.getItem('byPriorityFilterChecked')) {
+                                document.getElementById('submitFilter').style.display='none'
                             }
                         }
 ">
@@ -321,18 +343,18 @@
                             Автор
                         </label>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                        <label class="form-check-label" for="flexCheckDefault">
-                            Дата создания
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
-                        <label class="form-check-label" for="flexCheckChecked">
-                            Срок
-                        </label>
-                    </div>
+{#                    <div class="form-check">#}
+{#                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">#}
+{#                        <label class="form-check-label" for="flexCheckDefault">#}
+{#                            Дата создания#}
+{#                        </label>#}
+{#                    </div>#}
+{#                    <div class="form-check">#}
+{#                        <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>#}
+{#                        <label class="form-check-label" for="flexCheckChecked">#}
+{#                            Срок#}
+{#                        </label>#}
+{#                    </div>#}
 
                 </div>
                 <div class="modal-footer">
@@ -381,6 +403,19 @@
             document.getElementById('byAuthorFilter').style.display='none';
             document.getElementById('byAuthorFilter').value='';
             $('#byAuthorCheck').prop('checked', false);
+        }
+
+        if(localStorage.getItem('byPriorityFilterChecked')) {
+            document.getElementById('byPriorityFilterLabel').style.display='';
+            document.getElementById('byPriorityFilter').style.display='';
+            document.getElementById('submitFilter').style.display='';
+            $('#byPriorityCheck').prop('checked', true);
+
+        } else {
+            document.getElementById('byPriorityFilterLabel').style.display='none';
+            document.getElementById('byPriorityFilter').style.display='none';
+            document.getElementById('byPriorityFilter').value='';
+            $('#byPriorityCheck').prop('checked', false);
         }
 
 

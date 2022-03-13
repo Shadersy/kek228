@@ -5,8 +5,10 @@ namespace App\Controller;
 use App\Entity\Comment;
 use App\Entity\File;
 use App\Entity\Ticket;
-use App\Event\TestEvent;
-use App\Event\TestEventSubscriber;
+use App\Event\MailEvent;
+use App\Event\MailEventSubsriber;
+use App\Event\TelegramEvent;
+use App\Event\TelegramEventSubscriber;
 use App\Form\CommentType;
 use App\Form\TicketType;
 use App\Repository\TelegramApiRepository;
@@ -30,8 +32,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\Security\Core\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\String\Slugger\SluggerInterface;
+
 
 
 /**
@@ -44,7 +48,6 @@ class TicketController extends AbstractController
     public static $STATUS_CLOSED = '3';
     public static $STATUS_CANCELED = '2';
     public static $STATUS_IN_JOB = '1';
-//    public static $STATUS_
 
     public function __construct(TokenStorageInterface $tokenStorage)
     {
@@ -53,12 +56,12 @@ class TicketController extends AbstractController
 
 
     /**
+     * @Security("is_authenticated()")
      * @Route("/", name="ticket_index", methods={"GET", "POST"})
      */
     public function index(
         TicketRepository $ticketRepository,
         EventDispatcherInterface $eventDispatcher,
-        Security $security,
         UserRepository $userRepository,
         Request $request
     ): Response
@@ -97,12 +100,20 @@ class TicketController extends AbstractController
                 }
             }
 
-            if(isset($request->request->get('filter')['author'])) {
+            if (isset($request->request->get('filter')['author'])) {
                 $filter = $request->request->get('filter');
 
                 $author = $userRepository->findOneBy(['login' => $filter['author']]);
                 if($author)
                 $builder->andWhere('p.sender = \'' . $author->getId() . '\'' );
+            }
+
+            if (isset($request->request->get('filter')['priority'])) {
+                $filter = $request->request->get('filter');
+
+//                dump($filter['priority']);die;
+                $builder->andWhere('p.importance in (\'' . $filter['priority']  . '\')');
+//                dump($builder->getQuery());die;
             }
         }
 
@@ -121,6 +132,7 @@ class TicketController extends AbstractController
 
     /**
      * @Route("/new", name="ticket_new", methods={"GET","POST"})
+     * @Security("is_authenticated()")
      */
     public function new(Request $request, AuthorizationCheckerInterface $authChecker, TelegramApiRepository $telegramApiRepository,
                         UserRepository $userRepository, EventDispatcherInterface $dispatcher): Response
@@ -156,9 +168,10 @@ class TicketController extends AbstractController
             $em->flush();
 
             $existedTelegramConfig = $telegramApiRepository->findAll();
+
             if($existedTelegramConfig) {
                 $telegramConfig = $existedTelegramConfig[0];
-                $event = new TestEvent(
+                $event = new TelegramEvent(
                     $telegramConfig->getBotToken(),
                     $telegramConfig->getChatId(),
                     '
@@ -167,9 +180,13 @@ class TicketController extends AbstractController
                     'Автор: ' . $ticket->getSender() . ' ' . PHP_EOL .
                     'Дата формирования: ' . $ticket->getCreatedOn()->format('Y:m:d')
                 );
-                $dispatcher->addSubscriber(new TestEventSubscriber());
-                $dispatcher->dispatch($event, TestEvent::NAME);
+                $dispatcher->addSubscriber(new TelegramEventSubscriber());
+                $dispatcher->dispatch($event, TelegramEvent::NAME);
             }
+
+            #TODO: Доделать майлер
+//            $dispatcher->addSubscriber(new MailEventSubsriber());
+//            $dispatcher->dispatch(new MailEvent(), MailEvent::NAME);
             return $this->redirectToRoute('ticket_index');
 
         }
@@ -182,12 +199,19 @@ class TicketController extends AbstractController
 
     /**
      * @Route("/{id}", name="ticket_show", methods={"GET", "POST"})
+     * @Security("is_authenticated()")
      */
     public function show(Ticket $ticket, Request $request, UserRepository $userRepository,  SluggerInterface $slugger): Response
     {
 
         $em = $this->getDoctrine()->getManager();
         $em->find(Ticket::class, $ticket->getId());
+
+
+
+        if ($this->getUser()->getLogin() != $ticket->getSender()->getLogin() && !in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+            return $this->redirectToRoute('ticket_index');
+        }
 
         $user = $this->getUser();
 
@@ -252,7 +276,6 @@ class TicketController extends AbstractController
             if ($file) {
 
                 $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                // this is needed to safely include the file name as part of the URL
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = $safeFilename.'-'.uniqid().'.'. $file->guessExtension();
                 $extension = $file->guessExtension();

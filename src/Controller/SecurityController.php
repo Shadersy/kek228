@@ -24,6 +24,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class SecurityController extends AbstractController
 {
@@ -52,6 +54,7 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/login", name="app_login")
+     * @Security("is_anonymous()")
      */
     public function login(AuthenticationUtils $authenticationUtils): Response
     {

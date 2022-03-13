@@ -10,11 +10,14 @@ use App\Repository\TelegramApiRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class TelegramApiController extends AbstractController
 {
 
     /**
+     * @IsGranted("ROLE_ADMIN")
      * @Route("/telegram_configuration", name="telegram_configuration", methods={"GET", "POST"} )
      */
     public function index(Request $request, TelegramApiRepository $repository) {

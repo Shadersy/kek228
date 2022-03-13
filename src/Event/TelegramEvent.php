@@ -4,9 +4,9 @@ namespace App\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
-class TestEvent extends Event
+class TelegramEvent extends Event
 {
-    public const NAME = 'test.event';
+    public const NAME = 'telegram.event';
 
     private $token;
     private $chatId;

@@ -5,17 +5,17 @@ namespace App\Event;
 use Doctrine\Common\EventSubscriber;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class TestEventSubscriber implements EventSubscriberInterface
+class TelegramEventSubscriber implements EventSubscriberInterface
 {
 
     public static function getSubscribedEvents()
     {
         return [
-          TestEvent::NAME => 'doSomething',
+          TelegramEvent::NAME => 'send',
         ];
     }
 
-    public function doSomething(TestEvent $event) {
+    public function send(TelegramEvent $event) {
         $response = array(
             'chat_id' => $event->getChatId(),
             'text' => $event->getMessage(),
