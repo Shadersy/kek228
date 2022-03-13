@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,7 +27,7 @@ class RegistrationController extends AbstractController
      *
      * @Route("/registration", name="registration" )
      */
-    public function index(Request $request)
+    public function index(Request $request, UserRepository $repository)
     {
         $user = new User();
 
@@ -44,15 +45,31 @@ class RegistrationController extends AbstractController
 
             // Save
             $em = $this->getDoctrine()->getManager();
-            $em->persist($user);
-            $em->flush();
 
-	    return $this->redirectToRoute('ticket_index');
+            $alreadyExistedUser = $repository->findOneBy(['login' => $user->getLogin()]);
+
+            $error = null;
+
+            if(!$alreadyExistedUser) {
+
+                $em->persist($user);
+                $em->flush();
+
+                return $this->redirectToRoute('ticket_index');
+            } else {
+                $error = 'Пользователь уже существует';
+
+                return $this->render('registration/index.html.twig', [
+                    'form' => $form->createView(),
+                    'user' => $this->getUser(),
+                    'error' => $error,
+                ]);
+            }
         }
 
         return $this->render('registration/index.html.twig', [
             'form' => $form->createView(),
-            'user' => $this->getUser()
+            'user' => $this->getUser(),
         ]);
     }
 }

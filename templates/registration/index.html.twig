@@ -111,6 +111,10 @@
                                         {#                                {{ form_row(form.name, {'attr': {'class': 'form-control'}}) }}#}
                                         {#                            </div>#}
                                         {#                        </div>#}
+                                        {% if error is defined %}
+                                            <div class="alert alert-danger">{{ error }}</div>
+                                        {% endif %}
+                                        
                                         <div class="form_group">
                                             <div class="col-md-12 mb-3">
                                                 {{ form_row(form.login, {'attr': {'class': 'form-control'}}) }}
