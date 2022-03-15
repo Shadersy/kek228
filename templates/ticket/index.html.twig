@@ -202,9 +202,9 @@
                         </thead>
                         <tbody>
                         {% for ticket in tickets | sort((b, a) => a.createdOn <=> b.createdOn )%}
-                            <tr>
+                            <tr onclick="window.location.href='{{ path('ticket_show', {'id': ticket.id}) }}'; return false">
                                 <th scope="row"><a id="ticketId" style="text-decoration: none"
-                                                   href="{{ path('ticket_show', {'id': ticket.id}) }}">{{ ticket.id }}
+                                                   >{{ ticket.id }}
                                     </a></th>
                                 <td>{{ ticket.status }}</td>
                                 <td> {% if ticket.importance == 1%}
