@@ -171,14 +171,36 @@ class TicketController extends AbstractController
 
             if($existedTelegramConfig) {
                 $telegramConfig = $existedTelegramConfig[0];
+                $priority = null;
+
+                switch ($ticket->getImportance()) {
+                    case 1 :
+                        $priority = 'Низкий';
+                        break;
+                    case 2 :
+                        $priority = 'Средний';
+                        break;
+                    case 3 :
+                        $priority = 'Высокий';
+                        break;
+                }
+
+                $deadLine = $ticket->getDeadline();
+                if ($deadLine) {
+                    $deadLine = $deadLine->format('Y-m-d');
+                } else {
+                    $deadLine = 'Не указан';
+                }
+
                 $event = new TelegramEvent(
                     $telegramConfig->getBotToken(),
                     $telegramConfig->getChatId(),
                     '
                     В системе создана заявка №' . $ticket->getId() . ' ' . PHP_EOL .
-                    'Важность: ' . $ticket->getImportance() . ' ' . PHP_EOL .
+                    'Приоритет: ' . $priority . ' ' . PHP_EOL .
                     'Автор: ' . $ticket->getSender() . ' ' . PHP_EOL .
-                    'Дата формирования: ' . $ticket->getCreatedOn()->format('Y:m:d')
+                    'Дата формирования: ' . $ticket->getCreatedOn()->format('Y:m:d') . ' ' . PHP_EOL .
+                    'Срок: ' . $deadLine
                 );
                 $dispatcher->addSubscriber(new TelegramEventSubscriber());
                 $dispatcher->dispatch($event, TelegramEvent::NAME);
