@@ -130,6 +130,7 @@
                     <option value="1">В обработке</option>
                     <option value="2">Отклонено</option>
                     <option value="3">Закрыт</option>
+                    <option value="4">В работе</option>
                 </select>
         </div>
 
@@ -202,7 +203,11 @@
                         </thead>
                         <tbody>
                         {% for ticket in tickets | sort((b, a) => a.createdOn <=> b.createdOn )%}
-                            <tr onclick="window.location.href='{{ path('ticket_show', {'id': ticket.id}) }}'; return false">
+                            <tr {% if ticket.deadline is not null and ticket.deadline |date("m/d/Y") <   "now"|date("m/d/Y")
+                            and ticket.status != "Закрыт" and ticket.status != "Отклонено"%}
+                                    style="background: #a52834"
+                            {% endif %}
+                                    onclick="window.location.href='{{ path('ticket_show', {'id': ticket.id}) }}'; return false">
                                 <th scope="row"><a id="ticketId" style="text-decoration: none"
                                                    >{{ ticket.id }}
                                     </a></th>

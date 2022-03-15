@@ -45,9 +45,10 @@ class TicketController extends AbstractController
 {
     private $tokenStorage;
 
-    public static $STATUS_CLOSED = '3';
+    public static $STATUS_V_OBRABOTKE = '1';
     public static $STATUS_CANCELED = '2';
-    public static $STATUS_IN_JOB = '1';
+    public static $STATUS_CLOSED = '3';
+    public static $STATUS_IN_JOB = '4';
 
     public function __construct(TokenStorageInterface $tokenStorage)
     {
@@ -94,8 +95,11 @@ class TicketController extends AbstractController
                     case self::$STATUS_CANCELED :
                         $builder->andWhere('p.status in (\'Отклонено\')');
                         break;
-                    case self::$STATUS_IN_JOB :
+                    case self::$STATUS_V_OBRABOTKE :
                         $builder->andWhere('p.status in (\'В обработке\')');
+                        break;
+                    case self::$STATUS_IN_JOB :
+                        $builder->andWhere('p.status in (\'В работе\')');
                         break;
                 }
             }
