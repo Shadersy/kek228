@@ -337,4 +337,24 @@ class TicketController extends AbstractController
             'upload_directory' => $this->getParameter('upload_directory'),
         ]);
     }
+
+    /**
+     * @Route("/download_file/{fileName}", name="file_download", methods={"GET"})
+     * @Security("is_authenticated()")
+     */
+    public function downloadFile(Request $request, File $file) {
+
+
+        $content = file_get_contents($this->getParameter('upload_directory') . $file->getFileName());
+
+
+        $response = new Response();
+
+        //set headers
+        $response->headers->set('Content-Type', 'mime/type');
+        $response->headers->set('Content-Disposition', 'attachment;filename="'.$file->getFileName());
+
+        $response->setContent($content);
+        return $response;
+    }
 }

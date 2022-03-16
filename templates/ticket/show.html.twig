@@ -261,11 +261,17 @@
                     {% if comment.file is not null%}
                         {%  for movedFile in comment.file %}
                             {% if movedFile.extension == 'png' %}
-                                                    <img src="{{ asset('build/web/upload/' ~ movedFile.fileName) }} " alt=" {{ movedFile.fileName }}" class="img-thumbnail" style="width: 470px">
+                                                    <img src="{{ asset('build/web/upload/' ~ movedFile.fileName) }} " alt=" {{ movedFile.fileName }}" class="img-thumbnail"
+                                                         style="width: 470px">
                             {% elseif movedFile.extension == 'pdf' %}
                                 <img src="{{ asset('build/pdf.png')}}" style="width:50px">
                                 {{ movedFile.fileName }}
                             {% endif %}
+                            
+                            <a href="{{ path('file_download', {
+                                'fileName' : movedFile.fileName
+                            }
+                            ) }}">Скачать</a>
                         {% endfor %}
 
                     {% endif %}
