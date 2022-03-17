@@ -260,13 +260,25 @@
                                         <strong class="d-block text-sm-end"> {{ comment.createdOn  | date('Y.m.d H:i:s') }}</strong>
                     {% if comment.file is not null%}
                         {%  for movedFile in comment.file %}
-                            {% if movedFile.extension == 'png' %}
+                            {% if movedFile.extension == 'png' or movedFile.extension == 'jpg' or movedFile.extension == 'jpeg' %}
                                                     <img src="{{ asset('build/web/upload/' ~ movedFile.fileName) }} " alt=" {{ movedFile.fileName }}" class="img-thumbnail"
                                                          style="width: 470px">
                             {% elseif movedFile.extension == 'pdf' %}
                                 <img src="{{ asset('build/pdf.png')}}" style="width:50px">
                                 {{ movedFile.fileName }}
+
+                            {% elseif movedFile.extension == 'xlsx' or movedFile.extension == 'xls' %}
+                                <img src="{{ asset('build/excel.png')}}" style="width:50px">
+                                {{ movedFile.fileName }}
+
+                            {% elseif movedFile.extension == 'docx' or movedFile.extension == 'doc' %}
+                                <img src="{{ asset('build/word.png')}}" style="width:50px">
+                                {{ movedFile.fileName }}
+                            {% elseif movedFile.extension == 'c' %}
+                                <img src="{{ asset('build/txt.png')}}" style="width:50px">
+                                {{ movedFile.fileName }}
                             {% endif %}
+
 
                             <a href="{{ path('file_download', {
                                 'fileName' : movedFile.fileName

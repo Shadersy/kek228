@@ -46,11 +46,17 @@ class CommentType extends AbstractType
                         'mimeTypes' => [
                             'application/pdf',
                             'web_images',
+                            'image/jpg',
+                            'application/msword',
+                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            'text/*',
                             'image/jpeg',
                             'image/png',
                             'application/x-pdf',
+                            'application/vnd.ms-excel',
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                         ],
-                        'mimeTypesMessage' => 'Please upload a valid PDF document',
+                        'mimeTypesMessage' => 'Не поддерживаемый формат файла',
                     ])
                 ],
             ]);
