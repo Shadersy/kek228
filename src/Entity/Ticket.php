@@ -30,7 +30,7 @@ class Ticket
     private $created_on;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable="true")
      */
     private $description;
 
@@ -90,12 +90,12 @@ class Ticket
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription()
     {
         return $this->description;
     }
 
-    public function setDescription(string $description): self
+    public function setDescription($description): self
     {
         $this->description = $description;
 
