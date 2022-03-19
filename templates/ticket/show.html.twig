@@ -221,7 +221,7 @@
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item">Статус: {{ ticket.status }}</li>
 
-                                {% if is_granted('ROLE_ADMIN') %}
+                                {% if is_granted('ROLE_ADMIN') and ticket.getStatus() != 'Закрыт' %}
                                     <li class="list-group-item">{{  include('ticket/_statusupdate.html.twig') }}</li>
                                 {% endif %}
                                 <li class="list-group-item">Приоритет:  {% if ticket.importance == 1%} Низкий {% elseif ticket.importance == 2 %} Средний{% else %}Высокий{% endif %}
