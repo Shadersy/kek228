@@ -55,6 +55,11 @@ class User implements UserInterface
      */
     private $comments;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $lastVisit;
+
     public function     __construct()
     {
         $this->tickets = new ArrayCollection();
@@ -244,5 +249,17 @@ class User implements UserInterface
     public function getPassword()
     {
         return (string) $this->password;
+    }
+
+    public function getLastVisit(): ?\DateTimeInterface
+    {
+        return $this->lastVisit;
+    }
+
+    public function setLastVisit(?\DateTimeInterface $lastVisit): self
+    {
+        $this->lastVisit = $lastVisit;
+
+        return $this;
     }
 }

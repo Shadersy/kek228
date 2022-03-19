@@ -88,4 +88,20 @@ class UserController extends AbstractController
          ]);
 
     }
+
+
+    /**
+     *
+     * @Route("/user_list", name="user_list", methods={"GET"})
+     */
+    public function index(Request $request, UserRepository $userRepository): Response
+    {
+        $users = $userRepository->findAll();
+
+        return $this->render('user/userlist.html.twig',
+            [
+                'currentUser' => $this->getUser(),
+                'users' => $users,
+            ]);
+    }
 }
