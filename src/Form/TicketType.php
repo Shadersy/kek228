@@ -36,6 +36,7 @@ class TicketType extends AbstractType
                     'placeholder' => [
                         'year' => 'Год', 'month' => 'Месяц', 'day' => 'День',
                     ],
+                    'attr' => ['min' => (new \DateTime())->format('Y-m-d')],
                 ])
                 ->add('description', TextareaType::class,
             [
