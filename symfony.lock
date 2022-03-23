@@ -115,6 +115,9 @@
     "egulias/email-validator": {
         "version": "3.1.1"
     },
+    "ezyang/htmlpurifier": {
+        "version": "v4.14.0"
+    },
     "friendsofphp/proxy-manager-lts": {
         "version": "v1.0.3"
     },
@@ -136,8 +139,20 @@
     "liip/test-fixtures-bundle": {
         "version": "1.11.2"
     },
+    "maennchen/zipstream-php": {
+        "version": "2.1.0"
+    },
+    "markbaker/complex": {
+        "version": "3.0.1"
+    },
+    "markbaker/matrix": {
+        "version": "3.0.0"
+    },
     "monolog/monolog": {
         "version": "2.2.0"
+    },
+    "myclabs/php-enum": {
+        "version": "1.7.7"
     },
     "nikic/php-parser": {
         "version": "v4.10.5"
@@ -154,6 +169,9 @@
     "phpdocumentor/type-resolver": {
         "version": "1.4.0"
     },
+    "phpoffice/phpspreadsheet": {
+        "version": "1.19.0"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },
@@ -163,11 +181,23 @@
     "psr/event-dispatcher": {
         "version": "1.0.0"
     },
+    "psr/http-client": {
+        "version": "1.0.1"
+    },
+    "psr/http-factory": {
+        "version": "1.0.1"
+    },
+    "psr/http-message": {
+        "version": "1.0.1"
+    },
     "psr/link": {
         "version": "1.0.0"
     },
     "psr/log": {
         "version": "1.1.4"
+    },
+    "psr/simple-cache": {
+        "version": "1.0.1"
     },
     "sensio/framework-extra-bundle": {
         "version": "5.2",
@@ -222,9 +252,6 @@
         "files": [
             "config/packages/dev/debug.yaml"
         ]
-    },
-    "symfony/debug-pack": {
-        "version": "v1.0.9"
     },
     "symfony/dependency-injection": {
         "version": "v5.2.7"
@@ -366,9 +393,6 @@
     "symfony/options-resolver": {
         "version": "v5.2.4"
     },
-    "symfony/orm-pack": {
-        "version": "v2.1.0"
-    },
     "symfony/panther": {
         "version": "1.0",
         "recipe": {
@@ -423,9 +447,6 @@
     "symfony/process": {
         "version": "v5.2.7"
     },
-    "symfony/profiler-pack": {
-        "version": "v1.0.5"
-    },
     "symfony/property-access": {
         "version": "v5.2.4"
     },
@@ -476,9 +497,6 @@
     "symfony/serializer": {
         "version": "v5.2.7"
     },
-    "symfony/serializer-pack": {
-        "version": "v1.0.4"
-    },
     "symfony/service-contracts": {
         "version": "v2.4.0"
     },
@@ -487,9 +505,6 @@
     },
     "symfony/string": {
         "version": "v5.2.6"
-    },
-    "symfony/test-pack": {
-        "version": "v1.0.7"
     },
     "symfony/translation": {
         "version": "3.3",
@@ -523,9 +538,6 @@
             "config/packages/twig.yaml",
             "templates/base.html.twig"
         ]
-    },
-    "symfony/twig-pack": {
-        "version": "v1.0.1"
     },
     "symfony/validator": {
         "version": "4.3",

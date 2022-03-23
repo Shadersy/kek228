@@ -40,7 +40,7 @@ class TicketType extends AbstractType
                 ])
                 ->add('description', TextareaType::class,
             [
-                'required' => false,
+                'required' => true,
                 'label' => 'Описание',
                 'attr' => [
                     'rows' => "5",

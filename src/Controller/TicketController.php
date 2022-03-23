@@ -115,9 +115,7 @@ class TicketController extends AbstractController
             if (isset($request->request->get('filter')['priority'])) {
                 $filter = $request->request->get('filter');
 
-//                dump($filter['priority']);die;
                 $builder->andWhere('p.importance in (\'' . $filter['priority']  . '\')');
-//                dump($builder->getQuery());die;
             }
         }
 
@@ -349,8 +347,6 @@ class TicketController extends AbstractController
 
 
         $response = new Response();
-
-        //set headers
         $response->headers->set('Content-Type', 'mime/type');
         $response->headers->set('Content-Disposition', 'attachment;filename="'.$file->getFileName());
 
