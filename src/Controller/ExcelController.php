@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Controller;
 
-
 use App\Repository\TicketRepository;
 use App\Service\ExcelService;
+use App\Service\TicketService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -20,12 +21,15 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class ExcelController extends AbstractController
 {
+    private ExcelService $excelService;
+    private TicketService $ticketService;
 
-    private $excelService;
-
-    public function __construct(ExcelService $excelService)
-    {
+    public function __construct(
+        ExcelService $excelService,
+        TicketService $ticketService
+    ) {
         $this->excelService = $excelService;
+        $this->ticketService = $ticketService;
     }
 
     /**
@@ -37,7 +41,6 @@ class ExcelController extends AbstractController
         $formFactory = Forms::createFormFactoryBuilder()
             ->addExtension(new HttpFoundationExtension())
             ->getFormFactory();
-
 
         $form = $formFactory->createBuilder()
                 ->add('created_from', DateType::class,
@@ -61,17 +64,11 @@ class ExcelController extends AbstractController
 
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
 
-            $createdFrom = $form->getData()['created_from']->format('Y-m-d');
-            $createdTo = $form->getData()['created_to']->format('Y-m-d');
+           $tickets = $this->ticketService->getTickets($form);
 
-            $builder = $repository->createQueryBuilder('t')
-                ->andWhere('t.created_on >= ' . '\'' . $createdFrom . '\'' . ' AND t.created_on < ' . '\'' . $createdTo . '\'');
-
-            $tickets = $builder->getQuery()->getResult();
-
-            if(!$tickets) {
+            if (empty($tickets)) {
                 return $this->render('excel/report_excel.html.twig', [
                     'ticketNotFound' => true,
                     'user' => $this->getUser(),
@@ -81,9 +78,7 @@ class ExcelController extends AbstractController
 
             $fileName = 'report' . 'kek' . '.xlsx' ?? 'project.xlsx';
 
-            $excelFile = $this->excelService->generateExcelReport($createdFrom, $createdTo, $tickets, $fileName);
-
-
+            $excelFile = $this->excelService->generateExcelReport($form, $tickets, $fileName);
 
             return $this->file($excelFile, $fileName, ResponseHeaderBag::DISPOSITION_INLINE);
         }

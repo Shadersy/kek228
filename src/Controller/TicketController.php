@@ -16,6 +16,8 @@ use App\Repository\TicketRepository;
 use App\Repository\UserRepository;
 use App\Security\User;
 use App\Security\UserAuthenticator;
+use App\Service\CommentService;
+use App\Service\TicketService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -44,17 +46,34 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 class TicketController extends AbstractController
 {
     private $tokenStorage;
+    private TicketService $ticketService;
+    private CommentService $commentService;
 
-    public static $STATUS_V_OBRABOTKE = '1';
-    public static $STATUS_CANCELED = '2';
-    public static $STATUS_CLOSED = '3';
-    public static $STATUS_IN_JOB = '4';
+    public const STATUS_NEW = '1';
+    public const STATUS_CANCELED = '2';
+    public const STATUS_CLOSED = '3';
+    public const STATUS_IN_JOB = '4';
 
-    public function __construct(TokenStorageInterface $tokenStorage)
-    {
+    public $statusLabels = [
+        self::STATUS_NEW => 'В обработке',
+        self::STATUS_IN_JOB => 'В работе',
+        self::STATUS_CANCELED => 'Отклонено',
+        self::STATUS_CLOSED => 'Закрыт',
+    ];
+
+    public const PRIORITY_LOW = 'Низкий';
+    public const PRIORITY_MIDDLE = 'Средний';
+    public const PRIORITY_HIGH = 'Высокий';
+
+    public function __construct(
+        TokenStorageInterface $tokenStorage,
+        TicketService  $ticketService,
+        CommentService $commentService
+    ) {
         $this->tokenStorage = $tokenStorage;
+        $this->ticketService = $ticketService;
+        $this->commentService = $commentService;
     }
-
 
     /**
      * @Security("is_authenticated()")
@@ -69,10 +88,7 @@ class TicketController extends AbstractController
     {
         $builder = $ticketRepository->createQueryBuilder('p');
 
-        $builder = $ticketRepository->createQueryBuilder('p');
         if (in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
-
-
 
         } else {
             $builder->andWhere('p.sender = ' . $this->getUser()->getId());
@@ -89,16 +105,16 @@ class TicketController extends AbstractController
                 $filter = $request->request->get('filter');
 
                 switch ($filter['status']) {
-                    case self::$STATUS_CLOSED :
+                    case self::STATUS_CLOSED :
                         $builder->andWhere('p.status in (\'Закрыт\')');
                         break;
-                    case self::$STATUS_CANCELED :
+                    case self::STATUS_CANCELED :
                         $builder->andWhere('p.status in (\'Отклонено\')');
                         break;
-                    case self::$STATUS_V_OBRABOTKE :
+                    case self::STATUS_NEW :
                         $builder->andWhere('p.status in (\'В обработке\')');
                         break;
-                    case self::$STATUS_IN_JOB :
+                    case self::STATUS_IN_JOB :
                         $builder->andWhere('p.status in (\'В работе\')');
                         break;
                 }
@@ -106,10 +122,11 @@ class TicketController extends AbstractController
 
             if (isset($request->request->get('filter')['author'])) {
                 $filter = $request->request->get('filter');
-
                 $author = $userRepository->findOneBy(['login' => $filter['author']]);
-                if($author)
-                $builder->andWhere('p.sender = \'' . $author->getId() . '\'' );
+
+                if ($author) {
+                    $builder->andWhere('p.sender = \'' . $author->getId() . '\'');
+                }
             }
 
             if (isset($request->request->get('filter')['priority'])) {
@@ -118,8 +135,6 @@ class TicketController extends AbstractController
                 $builder->andWhere('p.importance in (\'' . $filter['priority']  . '\')');
             }
         }
-
-
 
         $tickets = $builder->getQuery()->execute();
 
@@ -139,55 +154,44 @@ class TicketController extends AbstractController
     public function new(Request $request, AuthorizationCheckerInterface $authChecker, TelegramApiRepository $telegramApiRepository,
                         UserRepository $userRepository, EventDispatcherInterface $dispatcher): Response
     {
-//        if (false === $authChecker->isGranted('ROLE_SUPER_ADMIN')) {
-//            return $this->redirectToRoute('course_index');
-//        }
-
         $filledTicket = new Ticket();
         $form = $this->createForm(TicketType::class, $filledTicket);
 
         $form->handleRequest($request);
-
-        $em = $this->getDoctrine()->getManager();
 
         $user = $this->getUser();
         $user = $userRepository->find($user->getId());
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $ticket = new Ticket();
-            $ticket->setCreatedOn(new \DateTime());
-            $ticket->setImportance($filledTicket->getImportance());
-            $ticket->setStatus('В обработке');
-            $ticket->setSender($user);
-            $ticket->setDescription($filledTicket->getDescription());
-
-                if ($filledTicket->getDeadline()) {
-                    $ticket->setDeadline($filledTicket->getDeadline());
-                }
-
-            $em->persist($ticket);
-            $em->flush();
+            $ticket = $this->ticketService
+                ->newTicket(
+                    $user,
+                    $filledTicket->getImportance(),
+                    $filledTicket->getDescription(),
+                    $filledTicket->getDeadline()
+                );
 
             $existedTelegramConfig = $telegramApiRepository->findAll();
 
-            if($existedTelegramConfig) {
+            if ($existedTelegramConfig) {
                 $telegramConfig = $existedTelegramConfig[0];
                 $priority = null;
 
                 switch ($ticket->getImportance()) {
                     case 1 :
-                        $priority = 'Низкий';
+                        $priority = self::PRIORITY_LOW;
                         break;
                     case 2 :
-                        $priority = 'Средний';
+                        $priority = self::PRIORITY_MIDDLE;
                         break;
                     case 3 :
-                        $priority = 'Высокий';
+                        $priority = self::PRIORITY_HIGH;
                         break;
                 }
 
                 $deadLine = $ticket->getDeadline();
+
                 if ($deadLine) {
                     $deadLine = $deadLine->format('Y-m-d');
                 } else {
@@ -209,10 +213,8 @@ class TicketController extends AbstractController
             }
 
             #TODO: Доделать майлер
-//            $dispatcher->addSubscriber(new MailEventSubsriber());
-//            $dispatcher->dispatch(new MailEvent(), MailEvent::NAME);
-            return $this->redirectToRoute('ticket_index');
 
+            return $this->redirectToRoute('ticket_index');
         }
 
         return $this->render('ticket/new.html.twig', [
@@ -227,11 +229,8 @@ class TicketController extends AbstractController
      */
     public function show(Ticket $ticket, Request $request, UserRepository $userRepository,  SluggerInterface $slugger): Response
     {
-
         $em = $this->getDoctrine()->getManager();
         $em->find(Ticket::class, $ticket->getId());
-
-
 
         if ($this->getUser()->getLogin() != $ticket->getSender()->getLogin() && !in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
             return $this->redirectToRoute('ticket_index');
@@ -239,23 +238,15 @@ class TicketController extends AbstractController
 
         $user = $this->getUser();
 
-        $statuses = [
-            'В обработке' => 'В обработке',
-            'В работе' => 'В работе',
-            'Отклонено' => 'Отклонено',
-            'Закрыт' => 'Закрыт',
-        ];
-
-        unset($statuses[$ticket->getStatus()]);
+        unset($this->statusLabels[$ticket->getStatus()]);
 
         $formFactory = Forms::createFormFactoryBuilder()
             ->addExtension(new HttpFoundationExtension())
             ->getFormFactory();
 
-
         $formStatus = $formFactory->createBuilder()
             ->add('Status', ChoiceType::class, [
-                'choices' => $statuses,
+                'choices' => $this->statusLabels,
                 'required' => true,
                 'label' => 'Статус задачи'])
             ->add('Filter', SubmitType::class, [
@@ -264,21 +255,14 @@ class TicketController extends AbstractController
             ])
             ->getForm();
 
-
         $formStatus->handleRequest($request);
 
         if ($formStatus->isSubmitted() && $formStatus->isValid()) {
             $selectedStatus = $formStatus->getData()['Status'];
             $ticket->setStatus($selectedStatus);
 
-            $userSystem = $userRepository->findOneBy(['login' => 'system']);
-            $comment = new Comment();
-            $comment->setSender($userSystem);
-            $comment->setCreatedOn(new \DateTime());
-            $comment->setTicket($ticket);
-            $comment->setMessage($user->getUsername().  ' изменил статус заявки на "' . $selectedStatus . '"');
-            $em->persist($comment);
-            $em->flush();
+            $systemUser = $userRepository->findOneBy(['login' => 'system']);
+            $this->commentService->newComment($systemUser, $ticket, $selectedStatus);
 
             return $this->redirectToRoute('ticket_show', ['id' => $ticket->getId()]);
         }
@@ -290,15 +274,14 @@ class TicketController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $comment = new Comment();
-            $comment->setSender($user);
-            $comment->setCreatedOn(new \DateTime());
-            $comment->setTicket($ticket);
-            $comment->setMessage($filledComment->getMessage());
+            $comment = $this
+                ->commentService
+                ->newComment($user, $ticket, $filledComment->getMessage());
+
+
             $file = $form->get('file')->getNormData();
 
             if ($file) {
-
                 $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = $safeFilename.'-'.uniqid().'.'. $file->guessExtension();
@@ -316,7 +299,7 @@ class TicketController extends AbstractController
                     $em->persist($fileObject);
                     $comment->addFile($fileObject);
                 } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
+                   throw $e;
                 }
 
             }
@@ -341,10 +324,7 @@ class TicketController extends AbstractController
      * @Security("is_authenticated()")
      */
     public function downloadFile(Request $request, File $file) {
-
-
         $content = file_get_contents($this->getParameter('upload_directory') . $file->getFileName());
-
 
         $response = new Response();
         $response->headers->set('Content-Type', 'mime/type');

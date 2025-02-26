@@ -29,8 +29,7 @@ class UserController extends AbstractController
     public function new(Request $request, UserRepository $userRepository): Response
     {
         $hasAccess = $this->isGranted('ROLE_ADMIN');
-        dump($hasAccess);
-        dump($this->getUser()->getRoles()); die;
+
         $filledUser = new User();
 
         $form = $this->createForm(UserCreateType::class, $filledUser);
@@ -86,9 +85,7 @@ class UserController extends AbstractController
              'form' => $form->createView(),
 
          ]);
-
     }
-
 
     /**
      *

@@ -10,19 +10,19 @@ use PhpOffice\PhpSpreadsheet\Style\Font;
 
 class ExcelService
 {
+    public function generateExcelReport(Forms $form, $data, $fileName) {
+        $from = $form->getData()['created_from']->format('Y-m-d');
+        $to = $form->getData()['created_to']->format('Y-m-d');
 
-    public function generateExcelReport($from, $to, $data, $fileName) {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle("Отчёт");
-
 
         $sheet = $this->setHeaderForTable(
             $sheet,
             $from,
             $to
         );
-
 
         $startRow =  7;
         foreach($data as $ticket) {
@@ -43,7 +43,7 @@ class ExcelService
             $sheet->setCellValueByColumnAndRow(10, $currentRow,  $ticket->getDeadline() ?? 'Не указан');
 
         }
-//        dump($data);die;
+
         $writer = new Xlsx($spreadsheet);
         $temp_file = tempnam(sys_get_temp_dir(), $fileName);
 
@@ -67,17 +67,6 @@ class ExcelService
         $sheet->setCellValueByColumnAndRow(2, 1, $currentDate);
         $sheet->setCellValueByColumnAndRow(2, 2, $from . '-' . $to);
 
-
-
-
-//        foreach ($markedMonth as $key => $month) {
-//            $sheet->setCellValueByColumnAndRow($startColumn, 5, $month);
-//            $oldCoordinate = $startColumn;
-//            $startColumn++;
-//            $sheet->mergeCellsByColumnAndRow($oldCoordinate, 5, $startColumn, 5);
-//            $startColumn++;
-//        }
-//
         $sheet->setCellValueByColumnAndRow(5, 6, 'Номер заявки');
         $this->makeBoldText($sheet, 5, 6);
         $sheet->setCellValueByColumnAndRow(6, 6, 'Статус');
@@ -90,22 +79,6 @@ class ExcelService
         $this->makeBoldText($sheet, 9, 6);
         $sheet->setCellValueByColumnAndRow(10, 6, 'Срок');
         $this->makeBoldText($sheet, 10, 6);
-
-
-//
-//        foreach ($markedMonth as $key => $month) {
-//            $sheet->setCellValueByColumnAndRow($startColumn, 6, 'EVO');
-//            $this->makeBoldText($sheet, $startColumn, 6);
-//            $startColumn++;
-//            $sheet->setCellValueByColumnAndRow($startColumn, 6, 'RM');
-//            $this->makeBoldText($sheet, $startColumn, 6);
-//            $startColumn++;
-//        }
-//
-//        $sheet->setCellValueByColumnAndRow($startColumn++, 6, 'Затраты по задаче за всё время');
-//        $this->makeBoldText($sheet, $startColumn, 6);
-//        $sheet->setCellValueByColumnAndRow($startColumn++, 6, 'Оценка из RM по данной задаче');
-//        $this->makeBoldText($sheet, $startColumn, 6);
 
         return $sheet;
     }

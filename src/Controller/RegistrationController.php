@@ -37,13 +37,9 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Encode the new users password
             $user->setPassword($this->passwordEncoder->encodePassword($user, $user->getPassword()));
-
-            // Set their role
             $user->setRoles(['ROLE_USER']);
 
-            // Save
             $em = $this->getDoctrine()->getManager();
 
             $alreadyExistedUser = $repository->findOneBy(['login' => $user->getLogin()]);
@@ -51,7 +47,6 @@ class RegistrationController extends AbstractController
             $error = null;
 
             if(!$alreadyExistedUser) {
-
                 $em->persist($user);
                 $em->flush();
 

@@ -13,7 +13,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TelegramApiType extends AbstractType
 {
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder

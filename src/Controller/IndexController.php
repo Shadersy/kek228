@@ -16,7 +16,6 @@ class IndexController extends AbstractController
      */
     public function index(AuthorizationCheckerInterface $authChecker): Response
     {
-
         if ($authChecker->isGranted('ROLE_USER')) {
             return $this->redirectToRoute('ticket_index');
         }

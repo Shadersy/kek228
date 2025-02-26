@@ -38,14 +38,15 @@ class TelegramApiController extends AbstractController
             $em = $this->getDoctrine()->getManager();
 
             if($existedConfig) {
-                $existedTelegramApi->setBotToken($form->getData()->getBottoken());
-                $existedTelegramApi->setChatId($form->getData()->getChatId());
+                $existedTelegramApi
+                    ->setBotToken($form->getData()->getBottoken())
+                    ->setChatId($form->getData()->getChatId());
             } else {
-                $telegramApiConnector = new TelegramApi();
-                $telegramApiConnector->setBotToken($form->getData()->getBottoken());
-                $telegramApiConnector->setChatId($form->getData()->getChatId());
-
-                $em->persist($telegramApiConnector);
+                $em->persist(
+                (new TelegramApi())
+                    ->setBotToken($form->getData()->getBottoken())
+                    ->setChatId($form->getData()->getChatId())
+                );
             }
             $em->flush();
         }
